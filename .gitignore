@@ -1,5 +1,6 @@
 *.class
 *.log
+.nrepl-port
 
 # sbt specific
 dist/*

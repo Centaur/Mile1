@@ -6,9 +6,6 @@
 (defn take-until [pred coll]
   (take-while (complement pred) coll))
 
-(defn not-nil? [v]
-  (not (nil? v)))
-
 (def base-url "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/")
 
 (defn getBytes "从jdk JarInputStream.java中移植过来的。读取当前项的数据" [is]
