@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io])
   (:import (java.nio.file Paths Path Files LinkOption)
            (java.io File)
-           (java.nio.file.attribute FileAttribute)))
+           (java.nio.file.attribute FileAttribute PosixFilePermission)))
 
 (defn ^Path build-path [^String root & subs]
   (Paths/get root (into-array String subs)))
@@ -28,4 +28,9 @@
 
 (defn ln-replace [^Path dst ^Path src]
   (Files/createSymbolicLink dst src (into-array FileAttribute [])))
+
+(defn set-executable [^Path path]
+  (Files/setPosixFilePermissions path #{PosixFilePermission/OWNER_EXECUTE
+                                        PosixFilePermission/OWNER_READ
+                                        PosixFilePermission/OWNER_WRITE}))
 

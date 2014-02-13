@@ -115,8 +115,10 @@
         (when (not (common/exists? link-file-path))
           (common/ln-replace link-file-path (dest-file-path version)))
         (when (not (common/exists? script-file-path))
-          (common/download-url-to (const :sbt-script-url)
-                                  script-file-path))
+          (do
+            (common/download-url-to (const :sbt-script-url)
+                                    script-file-path)
+            (common/set-executable script-file-path)))
         (println "安装完成.")))))
 
 (defn install-if-none-installed []
