@@ -15,7 +15,7 @@
               ]
 
           {:sbt-launcher-index-page     "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/"
-           :sbt-script-url              "http://git.oschina.net/43284683/Mile1/raw/downloads"
+           :sbt-script-url              "http://git.oschina.net/43284683/Mile1/raw/master/downloads/sbt"
            :link-extractor              #"<a href=\"(\d+.*)/\"+>\1/</a>"
            :version-extractor           #"(\d+)\.(\d+)\.(\d+)(-(.*))?"
            :type-priority               {:M 1, :Beta 2, :RC 3, :GA 4}
@@ -115,7 +115,8 @@
         (when (not (common/exists? link-file-path))
           (common/ln-replace link-file-path (dest-file-path version)))
         (when (not (common/exists? script-file-path))
-          (spit (.toFile script-file-path) (slurp (const :sbt-script-url))))
+          (common/download-url-to (const :sbt-script-url)
+                                  script-file-path))
         (println "安装完成.")))))
 
 (defn install-if-none-installed []
