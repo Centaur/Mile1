@@ -26,3 +26,6 @@
 (defn ^String path-simple-name [^Path path]
   (.. path getFileName toString))
 
+(defn ln-replace [^Path dst ^Path src]
+  (Files/createSymbolicLink dst src (into-array FileAttribute [])))
+

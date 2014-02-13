@@ -1,6 +1,6 @@
 (ns com.gtan.mile1.manifest-reader
-  (:import (java.io ByteArrayOutputStream BufferedInputStream ByteArrayInputStream File)
-           (java.util.jar Manifest JarFile))
+  (:import (java.io ByteArrayOutputStream BufferedInputStream ByteArrayInputStream File FileInputStream)
+           (java.util.jar Manifest JarFile JarInputStream))
   (:require [clojure.java.io :as io]))
 
 (defn take-until [pred coll]
@@ -37,12 +37,13 @@
     (.closeEntry jis)
     man))
 
-(def sbt-launch-jar-path (str (System/getProperty "user.home") "/bin/sbt-launch.jar"))
-(defn current-sbt-version "从本地sbt-launch.jar中获取版本" []
+#_(def sbt-launch-jar-path (str (System/getProperty "user.home") "/bin/sbt-launch.jar"))
+
+(defn read-sbt-version "从本地sbt-launch.jar中获取版本" [sbt-launch-jar-path]
   (if (.exists (io/as-file sbt-launch-jar-path))
     (-> sbt-launch-jar-path
-        java.io.FileInputStream.
-        java.util.jar.JarInputStream.
+        FileInputStream.
+        JarInputStream.
         read-manifest
         .getMainAttributes
         (.getValue "Implementation-Version"))))
@@ -96,7 +97,7 @@
     )
   )
 
-(defn download-sbt-launch-jar [version]
+(defn download-sbt-launch-jar [version sbt-launch-jar-path]
   (let [temp  (File/createTempFile "sbt-launch.jar" "tmp")
         sbt-jar-file (clojure.java.io/as-file sbt-launch-jar-path)]
     (with-open [is (clojure.java.io/input-stream (str base-url "/" version "/sbt-launch.jar"))
@@ -105,7 +106,7 @@
     (if (.exists sbt-jar-file) (clojure.java.io/delete-file sbt-jar-file))
     (.renameTo temp (clojure.java.io/as-file sbt-launch-jar-path))))
 
-(defn update-sbt []
+#_(defn update-sbt []
   (let [versions (newer-versions (available-versions) (current-sbt-version))]
     (dorun (map-indexed #(println (format "[%d]\t%s" %1 %2)) versions))
     (print "Select a version to install [0]") (flush)

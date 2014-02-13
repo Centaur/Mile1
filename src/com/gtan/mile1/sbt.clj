@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [com.gtan.mile1.wizard :as wizard]
             [com.gtan.mile1.common :as common]
+            [com.gtan.mile1.manifest-reader :as manifest-reader]
             [clojure.string :as string])
   (:import (java.nio.file Paths Files Path)
            (java.io File)))
@@ -9,18 +10,20 @@
 (def ^{:private true}
   const (let [base-path (common/build-path (System/getProperty "user.home")
                                            ".mile1" "sbt_install")
-              mile1-script-path (System/getProperty "mile1.script.path") ; this is where we put sbt shell script and link to using sbt-launch.jar
+              mile1-script-path (common/build-path (System/getProperty "mile1.script.path")) ; this is where we put sbt shell script and link to using sbt-launch.jar
               sbt-version-file-path (.resolve base-path "using_version")
               ]
 
           {:sbt-launcher-index-page     "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/"
+           :sbt-script-url              "http://git.oschina.net/43284683/Mile1/raw/downloads"
            :link-extractor              #"<a href=\"(\d+.*)/\"+>\1/</a>"
            :version-extractor           #"(\d+)\.(\d+)\.(\d+)(-(.*))?"
            :type-priority               {:M 1, :Beta 2, :RC 3, :GA 4}
            :installation-base-path      base-path
            :sbt-version-store-file-path sbt-version-file-path
-           :sbt-version-store-file (.toFile sbt-version-file-path)
-           :sbt-script-path             mile1-script-path
+           :sbt-version-store-file      (.toFile sbt-version-file-path)
+           :sbt-script-file-path        (.resolve mile1-script-path "sbt")
+           :sbt-launcher-link-file-path (.resolve mile1-script-path "sbt-launch.jar")
            }))
 
 (common/mkdir (const :installation-base-path))
@@ -100,14 +103,19 @@
 (defn install
   "install specified version of sbt-launch.jar if not installed"
   [literal-version]
-  (let [version (actual-version literal-version)]
+  (let [version (actual-version literal-version)
+        link-file-path (const :sbt-launcher-link-file-path)
+        script-file-path (const :sbt-script-file-path)]
     (if (contains? (set (installed-sbt-versions)) version)
       (println "版本 " version " 已经安装. 退出.")
       (do
         (println "安装 sbt 版本" version)
         (common/download-url-to (url-of-version version)
                                 (dest-file-path version))
-        (spit (const :sbt-version-store-file) version)
+        (when (not (common/exists? link-file-path))
+          (common/ln-replace link-file-path (dest-file-path version)))
+        (when (not (common/exists? script-file-path))
+          (spit (.toFile script-file-path) (slurp (const :sbt-script-url))))
         (println "安装完成.")))))
 
 (defn install-if-none-installed []
@@ -123,7 +131,8 @@
     (println version)))
 
 (def using-version
-  (delay (slurp (const :sbt-version-store-file))))
+  (delay (let [link-file-path (const :sbt-launcher-link-file-path)]
+           (manifest-reader/read-sbt-version link-file-path))))
 
 (defn set-using-version [version]
   (if (= @using-version version)

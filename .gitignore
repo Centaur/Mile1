@@ -1,5 +1,7 @@
 *.class
 *.log
+*.swp
+
 .nrepl-port
 .lein-failures
 .lein-repl-history
@@ -14,6 +16,9 @@ project/plugins/project/
 
 # Scala-IDE specific
 .scala_dependencies
+
 .idea/
 .idea_modules/
 *.iml
+downloads/stale/
+downloads/repl-port

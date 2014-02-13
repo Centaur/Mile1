@@ -2,8 +2,8 @@
 
 export MILE1_VERSION="1.0.0"
 export MILE1_HOME="$HOME/.mile1"
-export MILE1_JAR="$MILE1_HOME/mile1-$MILE1_VERSION.jar"
-export MILE1_JAR_URL="http://git.oschina.net/43284683/Mile1/raw/dist/mile1-$MILE1_VERSION.jar"
+export MILE1_JAR="$MILE1_HOME/mile1.jar"
+export MILE1_JAR_URL="http://git.oschina.net/43284683/Mile1/raw/dist/mile1.jar"
 
 # check $MILE1_JAR , if not exists , download from $MILE1_JAR_URL
 # all other features delegated to java code
@@ -34,7 +34,7 @@ if [[ ! -r $MILE1_JAR ]]; then
     fi
 fi
 
-$JAVA_CMD -Dmile1.script.path=`dirname $0` -jar $MILE1_JAR "$@"
+$JAVA_CMD -Dmile1.script.path="$(dirname $0)" -jar $MILE1_JAR "$@"
 
 
 

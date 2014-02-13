@@ -5,6 +5,10 @@
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :resource-paths ["resources"]
   :main com.gtan.mile1.main
+  :aot [com.gtan.mile1.main]
   :dependencies [[org.clojure/clojure "1.5.1"]]
+  :target-path "downloads/"
+  :jar-name "mile1-nodep.jar"
+  :uberjar-name "mile1.jar"
   ;:plugins [[lein-autoreload "0.1.0"]]
   )
