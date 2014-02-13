@@ -20,8 +20,6 @@
            :version-extractor           #"(\d+)\.(\d+)\.(\d+)(-(.*))?"
            :type-priority               {:M 1, :Beta 2, :RC 3, :GA 4}
            :installation-base-path      base-path
-           :sbt-version-store-file-path sbt-version-file-path
-           :sbt-version-store-file      (.toFile sbt-version-file-path)
            :sbt-script-file-path        (.resolve mile1-script-path "sbt")
            :sbt-launcher-link-file-path (.resolve mile1-script-path "sbt-launch.jar")
            }))
@@ -140,7 +138,8 @@
 (defn set-using-version [version]
   (if (= @using-version version)
     (do (println "正在使用 sbt" version))
-    (do (spit (const :sbt-version-store-file) version)
+    (do (common/ln-replace (const :sbt-launcher-link-file-path)
+                           (dest-file-path version))
         (println "使用 sbt" version))))
 
 (defn use-version [version] ; ask use if version is nil

@@ -1,4 +1,4 @@
 #!/bin/sh
 test -f ~/.sbtconfig && . ~/.sbtconfig
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-exec java -Xmx512M ${SBT_OPTS} -jar $DIR/sbt-launch.jar "$@"
+#DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+exec java -Xmx512M ${SBT_OPTS} -jar $(dirname "$0")/sbt-launch.jar "$@"
