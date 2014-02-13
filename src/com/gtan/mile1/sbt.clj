@@ -137,7 +137,7 @@
 
 (defn set-using-version [version]
   (if (= @using-version version)
-    (do (println "正在使用 sbt" version))
+    (println "正在使用 sbt" version)
     (do (common/ln-replace (const :sbt-launcher-link-file-path)
                            (dest-file-path version))
         (println "使用 sbt" version))))

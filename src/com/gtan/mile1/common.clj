@@ -27,6 +27,7 @@
   (.. path getFileName toString))
 
 (defn ln-replace [^Path dst ^Path src]
+  (when (exists? dst) (Files/delete dst))
   (Files/createSymbolicLink dst src (into-array FileAttribute [])))
 
 (defn set-executable [^Path path]
