@@ -1,6 +1,7 @@
 (ns com.gtan.mile1.manifest-reader
   (:import (java.io ByteArrayOutputStream BufferedInputStream ByteArrayInputStream File FileInputStream)
-           (java.util.jar Manifest JarFile JarInputStream))
+           (java.util.jar Manifest JarFile JarInputStream)
+           (java.nio.file Path))
   (:require [clojure.java.io :as io]
             [com.gtan.mile1.common :as common]))
 
@@ -40,9 +41,9 @@
 
 #_(def sbt-launch-jar-path (str (System/getProperty "user.home") "/bin/sbt-launch.jar"))
 
-(defn read-sbt-version "从本地sbt-launch.jar中获取版本" [sbt-launch-jar-path]
+(defn read-sbt-version "从本地sbt-launch.jar中获取版本" [^Path sbt-launch-jar-path]
   (if (common/exists? sbt-launch-jar-path)
-    (-> sbt-launch-jar-path
+    (-> (.toFile sbt-launch-jar-path)
         FileInputStream.
         JarInputStream.
         read-manifest
