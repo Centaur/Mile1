@@ -1,6 +1,8 @@
 *.class
 *.log
 .nrepl-port
+.lein-failures
+.lein-repl-history
 
 # sbt specific
 dist/*
