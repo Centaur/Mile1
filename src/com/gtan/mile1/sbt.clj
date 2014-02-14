@@ -8,23 +8,23 @@
            (java.io File)))
 
 (def ^{:private true}
-  const (let [base-path (common/build-path (System/getProperty "user.home")
-                                           ".mile1" "sbt_install")
-              mile1-script-path (common/build-path (System/getProperty "mile1.script.path")) ; this is where we put sbt shell script and link to using sbt-launch.jar
-              sbt-version-file-path (.resolve base-path "using_version")
-              ]
+  const (when-not *compile-files*
+          (let [base-path (common/build-path (System/getProperty "user.home")
+                                             ".mile1" "sbt_install")
+                mile1-script-path (common/build-path (System/getProperty "mile1.script.path")) ; this is where we put sbt shell script and symbolic link to the current used sbt-launch.jar
+                ]
 
-          {:sbt-launcher-index-page     "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/"
-           :sbt-script-url              "http://git.oschina.net/43284683/Mile1/raw/master/downloads/sbt"
-           :link-extractor              #"<a href=\"(\d+.*)/\"+>\1/</a>"
-           :version-extractor           #"(\d+)\.(\d+)\.(\d+)(-(.*))?"
-           :type-priority               {:M 1, :Beta 2, :RC 3, :GA 4}
-           :installation-base-path      base-path
-           :sbt-script-file-path        (.resolve mile1-script-path "sbt")
-           :sbt-launcher-link-file-path (.resolve mile1-script-path "sbt-launch.jar")
-           }))
+            {:sbt-launcher-index-page     "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/"
+             :sbt-script-url              "http://git.oschina.net/43284683/Mile1/raw/master/downloads/sbt"
+             :link-extractor              #"<a href=\"(\d+.*)/\"+>\1/</a>"
+             :version-extractor           #"(\d+)\.(\d+)\.(\d+)(-(.*))?"
+             :type-priority               {:M 1, :Beta 2, :RC 3, :GA 4}
+             :installation-base-path      base-path
+             :sbt-script-file-path        (.resolve mile1-script-path "sbt")
+             :sbt-launcher-link-file-path (.resolve mile1-script-path "sbt-launch.jar")
+             })))
 
-(common/mkdir (const :installation-base-path))
+(when-not *compile-files* (common/mkdir (const :installation-base-path)))
 
 (defn parse-extra
   "M3 => [:M 3]
@@ -59,10 +59,11 @@
       (<= (compare main1 main2) 0))))
 
 (def stable-versions
-  (let [page (slurp (const :sbt-launcher-index-page))
-        versions (map (comp parse-version second) (re-seq (const :link-extractor) page))
-        is_stable (fn [[_ [type-tag _]]] (= type-tag :GA))]
-    (delay (filter is_stable versions))))
+  (delay
+    (let [page (slurp (const :sbt-launcher-index-page))
+          versions (map (comp parse-version second) (re-seq (const :link-extractor) page))
+          is_stable (fn [[_ [type-tag _]]] (= type-tag :GA))]
+      (filter is_stable versions))))
 
 (defn retrieve-latest [versions]
   (last versions)) ; for stable-versions this is adequate, ToDo: a generally correct implementation

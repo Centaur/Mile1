@@ -7,7 +7,7 @@
   (try
     (doseq [option (map-indexed #(str "[" %1 "]" %2) options)]
       (println option))
-    (print (str prompt (if default (str "(默认 " default ")")) ":"))
+    (print (str prompt (if default (str "(默认 " (.indexOf options default) ")")) ":"))
     (flush)
     (let [input (read-line)]
       (if (empty? input)
