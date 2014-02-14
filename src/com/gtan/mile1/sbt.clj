@@ -172,7 +172,7 @@
     (println "清理完毕.")))
 
 (defn reset []
-  (Files/delete (const :sbt-script-file-path))
-  (Files/delete (const :sbt-launcher-link-file-path))
+  (Files/deleteIfExists (const :sbt-script-file-path))
+  (Files/deleteIfExists (const :sbt-launcher-link-file-path))
   (common/delete-tree (const :installation-base-path))
   (println "Mile1已清零."))

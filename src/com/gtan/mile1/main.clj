@@ -29,7 +29,7 @@ mile1 reset")
   "Delete all mile1 files except mile1 shell script, delete all sbt files. Get clean state."
   []
   (install-mile1-jar-if-none-installed)
-  (Files/delete (const :mile1-jar-path))
+  (Files/deleteIfExists (const :mile1-jar-path))
   (sbt/reset))
 
 (defn- go "Main Program" [args]
