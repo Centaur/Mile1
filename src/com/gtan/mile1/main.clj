@@ -40,7 +40,7 @@ mile1 reset")
       "use" (sbt/use-version (second args))
       "new" (let [project-name (second args)])
       "reset" (do-reset)
-      (println (type cmd) usage))))
+      (println usage))))
 
 (defn -main [& args]
   (go args))

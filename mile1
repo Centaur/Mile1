@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-export MILE1_VERSION="1.0.0"
 export MILE1_HOME="$HOME/.mile1"
 export MILE1_JAR="$MILE1_HOME/mile1.jar"
 export MILE1_JAR_URL="http://git.oschina.net/43284683/Mile1/raw/master/downloads/mile1.jar"
 
 # check $MILE1_JAR , if not exists , download from $MILE1_JAR_URL
-# all other features delegated to java code
-# sbt jar and shell script will be installed at the same directory of this script
+# all other features delegated to clojure code
+# sbt jar and sbt launch script will be installed at the same directory of this script
 
 export JAVA_CMD="${JAVA_CMD:="java"}"
 
