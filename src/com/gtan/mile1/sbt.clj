@@ -169,10 +169,9 @@
         (Files/delete launcher-file-path)
         (Files/delete (.getParent launcher-file-path))))
     (set-using-version (last all-installed))
-    (println "清理完毕.")))
+    (println "sbt清理完毕, 仅保留已安装的最新版本.")))
 
 (defn reset []
   (Files/deleteIfExists (const :sbt-script-file-path))
   (Files/deleteIfExists (const :sbt-launcher-link-file-path))
-  (common/delete-tree (const :installation-base-path))
-  (println "Mile1已清零."))
+  (common/delete-tree (const :installation-base-path)))

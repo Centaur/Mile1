@@ -30,7 +30,8 @@ mile1 reset")
   []
   (install-mile1-jar-if-none-installed)
   (Files/deleteIfExists (const :mile1-jar-path))
-  (sbt/reset))
+  (sbt/reset)
+  (println "Mile1已清零."))
 
 (defn- go "Main Program" [args]
   (let [cmd (first args)]

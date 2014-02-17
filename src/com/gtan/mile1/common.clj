@@ -38,14 +38,13 @@
 (defn delete-tree [^Path path]
   (Files/walkFileTree path (reify FileVisitor
                              (visitFile [this file attr]
-                               (do (Files/delete file)
-                                   FileVisitResult/CONTINUE))
+                               (Files/delete file)
+                               FileVisitResult/CONTINUE)
                              (preVisitDirectory [this dir attr]
                                FileVisitResult/CONTINUE)
                              (postVisitDirectory [this dir attr]
-                               (do (Files/delete dir)
-                                   FileVisitResult/CONTINUE))
+                               (Files/delete dir)
+                               FileVisitResult/CONTINUE)
                              (visitFileFailed [this file exc]
-                               (throw exc))))
-  )
+                               (throw exc)))))
 
