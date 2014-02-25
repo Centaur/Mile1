@@ -1,6 +1,6 @@
 (ns com.gtan.mile1.common
   (:require [clojure.java.io :as io])
-  (:import (java.nio.file Paths Path Files LinkOption FileVisitor FileVisitResult)
+  (:import (java.nio.file Paths Path Files LinkOption FileVisitor FileVisitResult CopyOption)
            (java.io File)
            (java.nio.file.attribute FileAttribute PosixFilePermission)))
 
@@ -28,7 +28,9 @@
 
 (defn ln-replace [^Path dst ^Path src]
   (when (exists? dst) (Files/delete dst))
-  (Files/createSymbolicLink dst src (into-array FileAttribute [])))
+  (try (Files/createSymbolicLink dst src (into-array FileAttribute []))
+       (catch UnsupportedOperationException e
+         (Files/copy src dst (into-array CopyOption [])))))
 
 (defn set-executable [^Path path]
   (Files/setPosixFilePermissions path #{PosixFilePermission/OWNER_EXECUTE

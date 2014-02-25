@@ -12,16 +12,16 @@
 
 (deftest test-parse-version
   []
-  (is (= (sbt/parse-version "2.10.3-M3") [[2 10 3] [:M 3]]))
-  (is (= (sbt/parse-version "2.10.3") [[2 10 3] [:GA 0]]))
-  (is (= (sbt/parse-version "2.10.3-Beta3") [[2 10 3] [:Beta 3]]))
-  (is (= (sbt/parse-version "2.10.3-RC10") [[2 10 3] [:RC 10]]))
+  (is (= (sbt/str->version "2.10.3-M3") [[2 10 3] [:M 3]]))
+  (is (= (sbt/str->version "2.10.3") [[2 10 3] [:GA 0]]))
+  (is (= (sbt/str->version "2.10.3-Beta3") [[2 10 3] [:Beta 3]]))
+  (is (= (sbt/str->version "2.10.3-RC10") [[2 10 3] [:RC 10]]))
   )
 
 (deftest test-version->str
   []
-  (is (= (sbt/version->str (sbt/parse-version "2.10.3-M3"))
+  (is (= (sbt/version->str (sbt/str->version "2.10.3-M3"))
          "2.10.3-M3"))
-  (is (= (sbt/version->str (sbt/parse-version "2.10.3"))
+  (is (= (sbt/version->str (sbt/str->version "2.10.3"))
          "2.10.3"))
   )

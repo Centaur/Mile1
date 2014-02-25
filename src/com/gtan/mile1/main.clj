@@ -27,7 +27,7 @@
     (common/download-url-to (const :mile1-jar-url)
                             (const :mile1-jar-path))))
 
-(defn do-reset
+(defn ^:deprecated do-reset
   "Delete all mile1 files except mile1 shell script, delete all sbt files. Get clean state."
   []
   (install-mile1-jar-if-none-installed)
@@ -58,7 +58,7 @@
       errors (exit 1 (error-msg errors)))
     (case subcmd
       "list" (sbt/show-current-installed-versions)
-      "available" (sbt/show-versions (:all options))
+      "available" (sbt/show-remote-versions (:all options))
       "install" (sbt/install (or (first arguments) "latest"))
       "uninstall" (sbt/uninstall (first arguments))
       "cleanup" (sbt/cleanup)

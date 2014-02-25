@@ -4,7 +4,7 @@
             [com.gtan.mile1.common :as common]
             [com.gtan.mile1.manifest-reader :as manifest-reader]
             [clojure.string :as string])
-  (:import (java.nio.file Paths Files Path)
+  (:import (java.nio.file Paths Files Path FileSystem)
            (java.io File)))
 
 (def ^:private
@@ -28,8 +28,7 @@
 
 (defn ^:private parse-extra
   "M3 => [:M 3]
-   nil => [:GA 0]
-  "
+   nil => [:GA 0]"
   [extra]
   (->
     (cond
@@ -42,86 +41,104 @@
       )
     (#(vector (first %) (and % (Integer/valueOf (second %)))))))
 
-(defn ^:private parse-version
+(defn ^:private str->version
   "2.10.3-M3 => [[2 10 3] [:M 3]]
    2.10.3 => [[2 10 3] [:GA 0]]"
-  [version]
-  (let [[[_ l1 l2 l3 _ extra]] (re-seq (const :version-extractor) version)]
+  [^String version-str]
+  (let [[[_ l1 l2 l3 _ extra]] (re-seq (const :version-extractor) version-str)]
     [(vec (map #(Integer/valueOf %) [l1 l2 l3])) (parse-extra extra)]))
 
-(defn compare-version [v1 v2]
-  (let [[main1 [type1 number1]] (parse-version v1)
-        [main2 [type2 number2]] (parse-version v2)]
-    (if (= main1 main2)
-      (if (= type1 type2)
-        (<= number1 number2)
-        (<= (type1 (const :type-priority)) (type2 (const :type-priority))))
-      (<= (compare main1 main2) 0))))
-
-(def versions
-  (delay
-    (let [page (slurp (const :sbt-launcher-index-page))]
-      (map (comp parse-version second) (re-seq (const :link-extractor) page)))))
-
-(defn filtered-versions [tag]
-  (let [filter-fn (fn [[_ [type-tag _]]] (= type-tag tag))]
-    (filter filter-fn @versions)))
-
 (defn version->str [version]
-  (let [maijor (apply str (string/join "." (first version)))
+  (let [major (apply str (string/join "." (first version)))
         [_ [type-tag number]] version]
     (if (= type-tag :GA)
       (if (zero? number)
-        maijor
-        (str maijor "-" number))
-      (str maijor "-" (name type-tag) number))))
+        major
+        (str major "-" number))
+      (str major "-" (name type-tag) number))))
 
-(defn show-versions [all]
-  (doseq [version (if all @versions (filtered-versions :GA))]
+(defn compare-version
+  "return v1 <= v2"
+  [[main1 [type1 number1]] [main2 [type2 number2]]]
+  (let [priorities (:type-priority const)]
+    (if (= main1 main2)
+      (if (= type1 type2)
+        (<= number1 number2)
+        (<= (type1 priorities) (type2 priorities)))
+      (<= (compare main1 main2) 0))))
+
+(def remote-versions
+  (delay
+    (let [page (slurp (:sbt-launcher-index-page const))]
+      (remove (fn [[_ [type-tag _]]] (nil? type-tag))
+              (map (comp str->version second)
+                   (re-seq (:link-extractor const) page))))))
+
+(defn versions-by-type [tag]
+  (let [filter-fn (fn [[_ [type-tag _]]] (= type-tag tag))]
+    (filter filter-fn @remote-versions)))
+
+(defn show-remote-versions [^Boolean all]
+  (doseq [version (sort (comparator compare-version)
+                        (if all
+                          @remote-versions
+                          (versions-by-type :GA)))]
     (println (version->str version))))
 
-(defn retrieve-latest [versions]
-  (last versions)) ; for stable-versions this is adequate, ToDo: a generally correct implementation
+(defn find-latest [[head & tail]]
+  (let [find-max (fn [vs accu]
+                   (if (empty? vs)
+                     accu
+                     (let [h2 (first vs)]
+                       (recur (rest vs)
+                              (if (compare-version (str->version accu)
+                                                   (str->version h2))
+                                h2
+                                accu)))))]
+    (find-max tail head)))
 
 
-(defn actual-version [literal-version]
-  (let [versions (map version->str (filtered-versions :GA))]
+(defn actual-version-str [^String literal-version]
+  (let [version-strs (map version->str (versions-by-type :GA))]
     (case literal-version
-      "latest" (retrieve-latest versions) ; in
+      "latest" (find-latest version-strs) ; in
       "choose" (wizard/ask {:prompt  "选择一个版本安装"
-                            :options versions
+                            :options version-strs
                             :format  :indexed ; or :text
-                            :default (last versions)})
+                            :default (last version-strs)})
       literal-version)))
 
 
-(defn installed-sbt-versions []
+(defn installed-sbt-versions
+  "return sorted"
+  []
   (let [root (const :installation-base-path)
         stream (Files/newDirectoryStream root)
         subdirs (filter #(and (common/is-dir? %)
                               (common/exists? (.resolve % "sbt-launch.jar"))) stream)]
-    (map common/path-simple-name subdirs)))
+    (sort (comparator compare-version)
+          (map (comp str->version common/path-simple-name) subdirs))))
 
-(defn url-of-version [version]
-  (str (const :sbt-launcher-index-page) "/" version "/sbt-launch.jar"))
+(defn url-of-version-str [^String version-str]
+  (str (const :sbt-launcher-index-page) "/" version-str "/sbt-launch.jar"))
 
-(defn dest-file-path [version]
-  (.resolve (const :installation-base-path) (common/build-path version "sbt-launch.jar")))
+(defn path-of-version [^String version-str]
+  (.resolve (:installation-base-path const) (common/build-path version-str "sbt-launch.jar")))
 
 (defn install
   "install specified version of sbt-launch.jar if not installed"
-  [literal-version]
-  (let [version (actual-version literal-version)
+  [^String literal-version]
+  (let [version-str (actual-version-str literal-version)
         link-file-path (const :sbt-launcher-link-file-path)
         script-file-path (const :sbt-script-file-path)]
-    (if (contains? (set (installed-sbt-versions)) version)
-      (println "版本 " version " 已经安装. 退出.")
+    (if ((set (installed-sbt-versions)) (str->version version-str))
+      (println "版本 " version-str " 已经安装. 退出.")
       (do
-        (println "安装 sbt 版本" version)
-        (common/download-url-to (url-of-version version)
-                                (dest-file-path version))
+        (println "安装 sbt 版本" version-str)
+        (common/download-url-to (url-of-version-str version-str)
+                                (path-of-version version-str))
         (when (not (common/exists? link-file-path))
-          (common/ln-replace link-file-path (dest-file-path version)))
+          (common/ln-replace link-file-path (path-of-version version-str)))
         (when (not (common/exists? script-file-path))
           (do
             (common/download-url-to (const :sbt-script-url)
@@ -135,45 +152,54 @@
       (println "sbt 未安装.")
       (install "choose"))))
 
-(defn uninstall [version]
-  (let [launcher-file-path (.resolve (const :installation-base-path)
-                                     (common/build-path version "sbt-launch.jar"))]
-    (print "正在删除版本" version "...")
-    (Files/delete launcher-file-path)
-    (Files/delete (.getParent launcher-file-path))
-    (println " 完成")))
-
-(def using-version
+(def using-version-str
   (delay (let [link-file-path (const :sbt-launcher-link-file-path)]
            (manifest-reader/read-sbt-version link-file-path))))
 
+
 (defn show-current-installed-versions []
   (println "已安装的版本:")
-  (doseq [version (installed-sbt-versions)]
-    (print version)
-    (when (= @using-version version)
+  (doseq [version-str (map version->str (installed-sbt-versions))]
+    (print version-str)
+    (when (= @using-version-str version-str)
       (print "(正在使用)"))
     (println)))
 
 
-(defn set-using-version [version]
-  (if (= @using-version version)
-    (println "正在使用 sbt" version)
-    (do (common/ln-replace (const :sbt-launcher-link-file-path)
-                           (dest-file-path version))
-        (println "使用 sbt" version))))
+(defn set-using-version [^String version-str]
+  (if (= @using-version-str version-str)
+    (println "正在使用 sbt" version-str)
+    (do (common/ln-replace (:sbt-launcher-link-file-path const)
+                           (path-of-version version-str))
+        (println "使用 sbt" version-str))))
 
-(defn use-version [version] ; ask use if version is nil
+(defn uninstall [^String version-str]
+  (let [launcher-file-path (.resolve (const :installation-base-path)
+                                     (common/build-path version-str "sbt-launch.jar"))]
+    (if ((set (installed-sbt-versions)) (str->version version-str))
+      (do
+        (when (= @using-version-str version-str)
+          (Files/delete (:sbt-launcher-link-file-path const)))
+        (print "正在删除版本" version-str "...")
+        (Files/delete launcher-file-path)
+        (Files/delete (.getParent launcher-file-path))
+        (println " 完成")
+        (if-let [installed (not-empty (installed-sbt-versions))]
+          (set-using-version (version->str (last installed)))))
+      (do (println "版本" version-str "并未安装。")))))
+
+
+(defn use-version [^String version] ; ask use if version is nil
   (install-if-none-installed)
   (let [versions (installed-sbt-versions)]
     (if (nil? version)
       (do
-        (println "当前使用的版本:" @using-version)
+        (println "当前使用的版本:" @using-version-str)
         (set-using-version (wizard/ask {:prompt  "选择要使用的版本"
                                         :options versions
                                         :format  :indexed
-                                        :default @using-version})))
-      (if (contains? (set versions) version)
+                                        :default @using-version-str})))
+      (if ((set versions) (str->version version))
         (set-using-version version)
         (println "版本 " version "未安装")))))
 
@@ -181,10 +207,10 @@
   "keep the latest installed version, delete others"
   []
   (install-if-none-installed)
-  (let [all-installed (sort (comparator compare-version) (installed-sbt-versions))]
+  (let [all-installed (installed-sbt-versions)]
     (doseq [version (drop-last all-installed)]
-      (uninstall version))
-    (set-using-version (last all-installed))
+      (uninstall (version->str version)))
+    (set-using-version (version->str (last all-installed)))
     (println "sbt清理完毕, 仅保留已安装的最新版本.")))
 
 (defn reset []
