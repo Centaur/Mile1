@@ -23,10 +23,9 @@
              :version-extractor           #"(\d+)\.(\d+)\.(\d+)(-(.*))?"
              :type-priority               {:M 1, :Beta 2, :RC 3, :GA 4}
              :installation-base-path      base-path
-             :sbt-script-file-path        (let [non-windows (.resolve mile1-script-path "sbt")]
-                                            (if (common/is-windows)
-                                              (str non-windows ".bat")
-                                              non-windows))
+             :sbt-script-file-path        (if (common/is-windows)
+                                            (.resolve mile1-script-path "sbt.bat")
+                                            (.resolve mile1-script-path "sbt"))
              :sbt-launcher-link-file-path (.resolve mile1-script-path "sbt-launch.jar")
              })))
 
