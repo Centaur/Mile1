@@ -1,33 +1,44 @@
 #Mile1
 
 ## Prerequisites
-* JDK 6+ and `java` command on your `$PATH`
-* `curl` or `wget` on your `$PATH` for downloading
+* JDK 6+ and `java` command on your `$PATH`|`%PATH%`
+* `curl` or `wget` on your `$PATH` for downloading on Linux or Mac.
 
-## Installation
+## Linux Installation
 1. Download shell script at "http://git.oschina.net/43284683/Mile1/raw/master/mile1"
 2. Place it on your `$PATH` (`~/bin` is a good choice if it is on your path)
 3. Set it to be executable. (`chmod 755 ~/bin/mile1`)
-4. run any of the following commands will automatically install required files. So the first run may take more time, be patient.
+4. run any of the following commands will automatically install required files.
 
-## install & upgrade sbt
+## Windows Installation
+1. Download shell script at "http://git.oschina.net/43284683/Mile1/raw/master/mile1.js"
+2. Place it on your `$PATH` (`%USERPROIFLE%/bin` is a good choice if it is on your path)
+3. run any of the following commands will automatically install required files.
+
+## install sbt
 ### install
-`mile1 sbt install [VERSION]|latest`
+`mile1 install [VERSION]|latest`
 
 if `VERSION` nor `latest` not specified, `mile1` will list all versions of `sbt-launch.jar` to choose.
 
-## create sbt project
-### simple project
-`mile1 new PROJECT_NAME [as properties|scala]`
+### uninstall
+`mile1 uninstall [VERSION]`
 
-`as properties` will create a project with a `build.properties` file in `$PROJECT_ROOT`.
+### cleanup
+`mile1 cleanup`
 
-`as scala` will create a project with a `Build.scala` file in `$PROJECT_ROOT/project/`.
-Default is `as scala`.
+Remove all versions except the latest installed.
 
-### from template
-`mile1 new PROJECT_NAME extends GITHUB_REPO`
-the format of
+## list all installed sbt version
+`mile1 list`
 
-## upgrade itself
-`mile1 upgrade`
+## list available sbt versions
+`mile1 available [-a]`
+
+List all available sbt versions remotely from official repository. By default it only lists stable versions. All versions will be listed if `-a` option is specified.
+
+## choose a sbt version
+`mile1 use VERSION`
+
+## upgrade mile1
+`mile1 update`
