@@ -7,7 +7,7 @@
   (:import (java.nio.file Paths Files Path)
            (java.io File)))
 
-(def ^{:private true}
+(def ^:private
   const (when-not *compile-files*
           (let [base-path (common/build-path (System/getProperty "user.home")
                                              ".mile1" "sbt_install")
@@ -26,7 +26,7 @@
 
 (when-not *compile-files* (common/mkdir (const :installation-base-path)))
 
-(defn parse-extra
+(defn ^:private parse-extra
   "M3 => [:M 3]
    nil => [:GA 0]
   "
@@ -42,7 +42,7 @@
       )
     (#(vector (first %) (and % (Integer/valueOf (second %)))))))
 
-(defn parse-version
+(defn ^:private parse-version
   "2.10.3-M3 => [[2 10 3] [:M 3]]
    2.10.3 => [[2 10 3] [:GA 0]]"
   [version]
@@ -58,25 +58,34 @@
         (<= (type1 (const :type-priority)) (type2 (const :type-priority))))
       (<= (compare main1 main2) 0))))
 
-(def stable-versions
+(def versions
   (delay
-    (let [page (slurp (const :sbt-launcher-index-page))
-          versions (map (comp parse-version second) (re-seq (const :link-extractor) page))
-          is_stable (fn [[_ [type-tag _]]] (= type-tag :GA))]
-      (filter is_stable versions))))
+    (let [page (slurp (const :sbt-launcher-index-page))]
+      (map (comp parse-version second) (re-seq (const :link-extractor) page)))))
+
+(defn filtered-versions [tag]
+  (let [filter-fn (fn [[_ [type-tag _]]] (= type-tag tag))]
+    (filter filter-fn @versions)))
+
+(defn version->str [version]
+  (let [maijor (apply str (string/join "." (first version)))
+        [_ [type-tag number]] version]
+    (if (= type-tag :GA)
+      (if (zero? number)
+        maijor
+        (str maijor "-" number))
+      (str maijor "-" (name type-tag) number))))
+
+(defn show-versions [all]
+  (doseq [version (if all @versions (filtered-versions :GA))]
+    (println (version->str version))))
 
 (defn retrieve-latest [versions]
   (last versions)) ; for stable-versions this is adequate, ToDo: a generally correct implementation
 
-(defn version-to-str [version]
-  (let [main (apply str (string/join "." (first version)))
-        [_ [type-tag number]] version]
-    (if (= type-tag :GA)
-      main
-      (str main "-" (name type-tag) number))))
 
 (defn actual-version [literal-version]
-  (let [versions (map version-to-str @stable-versions)]
+  (let [versions (map version->str (filtered-versions :GA))]
     (case literal-version
       "latest" (retrieve-latest versions) ; in
       "choose" (wizard/ask {:prompt  "选择一个版本安装"
@@ -126,15 +135,26 @@
       (println "sbt 未安装.")
       (install "choose"))))
 
-
-(defn show-current-installed-version []
-  (println "已安装的版本:")
-  (doseq [version (installed-sbt-versions)]
-    (println version)))
+(defn uninstall [version]
+  (let [launcher-file-path (.resolve (const :installation-base-path)
+                                     (common/build-path version "sbt-launch.jar"))]
+    (print "正在删除版本" version "...")
+    (Files/delete launcher-file-path)
+    (Files/delete (.getParent launcher-file-path))
+    (println " 完成")))
 
 (def using-version
   (delay (let [link-file-path (const :sbt-launcher-link-file-path)]
            (manifest-reader/read-sbt-version link-file-path))))
+
+(defn show-current-installed-versions []
+  (println "已安装的版本:")
+  (doseq [version (installed-sbt-versions)]
+    (print version)
+    (when (= @using-version version)
+      (print "(正在使用)"))
+    (println)))
+
 
 (defn set-using-version [version]
   (if (= @using-version version)
@@ -163,11 +183,7 @@
   (install-if-none-installed)
   (let [all-installed (sort (comparator compare-version) (installed-sbt-versions))]
     (doseq [version (drop-last all-installed)]
-      (let [launcher-file-path (.resolve (const :installation-base-path)
-                                         (common/build-path version "sbt-launch.jar"))]
-        (println "正在删除版本" version)
-        (Files/delete launcher-file-path)
-        (Files/delete (.getParent launcher-file-path))))
+      (uninstall version))
     (set-using-version (last all-installed))
     (println "sbt清理完毕, 仅保留已安装的最新版本.")))
 

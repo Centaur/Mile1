@@ -6,7 +6,8 @@
   :resource-paths ["resources"]
   :main com.gtan.mile1.main
   :aot [com.gtan.mile1.main]
-  :dependencies [[org.clojure/clojure "1.5.1"]]
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 [org.clojure/tools.cli "0.3.1"]]
   :target-path "downloads/"
   :jar-name "mile1-nodep.jar"
   :uberjar-name "mile1.jar"
