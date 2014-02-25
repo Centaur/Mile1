@@ -15,12 +15,18 @@
                 ]
 
             {:sbt-launcher-index-page     "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/"
-             :sbt-script-url              "http://git.oschina.net/43284683/Mile1/raw/master/downloads/sbt"
+             :sbt-script-url              (let [non-windows "http://git.oschina.net/43284683/Mile1/raw/master/downloads/sbt"]
+                                            (if (common/is-windows)
+                                                  (str non-windows ".bat")
+                                                  non-windows))
              :link-extractor              #"<a href=\"(\d+.*)/\"+>\1/</a>"
              :version-extractor           #"(\d+)\.(\d+)\.(\d+)(-(.*))?"
              :type-priority               {:M 1, :Beta 2, :RC 3, :GA 4}
              :installation-base-path      base-path
-             :sbt-script-file-path        (.resolve mile1-script-path "sbt")
+             :sbt-script-file-path        (let [non-windows (.resolve mile1-script-path "sbt")]
+                                            (if (common/is-windows)
+                                              (str non-windows ".bat")
+                                              non-windows))
              :sbt-launcher-link-file-path (.resolve mile1-script-path "sbt-launch.jar")
              })))
 
@@ -129,8 +135,8 @@
   "install specified version of sbt-launch.jar if not installed"
   [^String literal-version]
   (let [version-str (actual-version-str literal-version)
-        link-file-path (const :sbt-launcher-link-file-path)
-        script-file-path (const :sbt-script-file-path)]
+        link-file-path (:sbt-launcher-link-file-path const)
+        script-file-path (:sbt-script-file-path const)]
     (if ((set (installed-sbt-versions)) (str->version version-str))
       (println "版本 " version-str " 已经安装. 退出.")
       (do
@@ -140,9 +146,9 @@
         (when (not (common/exists? link-file-path))
           (common/ln-replace link-file-path (path-of-version version-str)))
         (when (not (common/exists? script-file-path))
-          (do
-            (common/download-url-to (const :sbt-script-url)
-                                    script-file-path)
+          (common/download-url-to (:sbt-script-url const)
+                                  script-file-path)
+          (when-not (common/is-windows)
             (common/set-executable script-file-path)))
         (println "安装完成.")))))
 
