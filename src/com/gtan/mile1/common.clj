@@ -26,11 +26,15 @@
 (defn ^String path-simple-name [^Path path]
   (.. path getFileName toString))
 
+(defn is-windows []
+  (let [os-name (System/getProperty "os.name")]
+    (zero? (.indexOf os-name "Windows"))))
+
 (defn ln-replace [^Path dst ^Path src]
   (when (exists? dst) (Files/delete dst))
-  (try (Files/createSymbolicLink dst src (into-array FileAttribute []))
-       (catch UnsupportedOperationException e
-         (Files/copy src dst (into-array CopyOption [])))))
+  (if (is-windows)
+    (Files/copy src dst (into-array CopyOption []))
+    (Files/createSymbolicLink dst src (into-array FileAttribute []))))
 
 (defn set-executable [^Path path]
   (Files/setPosixFilePermissions path #{PosixFilePermission/OWNER_EXECUTE
