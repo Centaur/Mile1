@@ -5,7 +5,7 @@
             [com.gtan.mile1.wizard :as wizard]
             [com.gtan.mile1.common :as common]
             [com.gtan.mile1.manifest-reader :as manifest-reader]
-            [com.gtan.mile1.sbt-version :as sbt-version :refer version->str str->version]
+            [com.gtan.mile1.sbt-version :as sbt-version :refer [version->str str->version]]
             [clojure.string :as string])
   (:import (java.nio.file Paths Files Path FileSystem)
            (java.io File)
