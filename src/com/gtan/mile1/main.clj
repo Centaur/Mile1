@@ -9,12 +9,13 @@
   (:import (java.nio.file Files)))
 
 (def usage "使用方法:
- mile1 list  ; 列出已安装的sbt版本
- mile1 available [-a] ; 列出所有sbt版本，默认显示稳定版本，加上-a显示包括Milestone版本，RC版本在内的所有版本
- mile1 install [VERSION]; 安装指定版本的sbt, 默认安装最新的稳定版
- mile1 uninstall VERSION ; 删除指定版本的sbt
- mile1 cleanup ; 保留最新版本的sbt，删除其它版本
- mile1 use VERSION ; 使用指定版本的sbt")
+ mile1 list\t\t\t; 列出已安装的sbt版本
+ mile1 available [-a]\t\t; 列出所有sbt版本，默认显示稳定版本，加上-a显示包括Milestone版本，RC版本在内的所有版本
+ mile1 install [VERSION]\t; 安装指定版本的sbt, 默认安装最新的稳定版
+ mile1 uninstall VERSION\t; 删除指定版本的sbt
+ mile1 cleanup\t\t\t; 保留最新版本的sbt，删除其它版本
+ mile1 use VERSION\t\t; 使用指定版本的sbt
+ mile1 usage\t\t\t; 显示本帮助信息")
 
 (def ^:private const
   (when-not *compile-files*
@@ -38,11 +39,7 @@
 (defn opts-for [subcmd]
   (case subcmd
     "available" [["-a" "--all" "显示所有版本"]]
-    "list" []
-    "install" []
-    "uninstall" []
-    "cleanup" []
-    "use" []))
+    []))
 
 (defn error-msg [errors]
   (str "命令参数错误：\n\n" (clojure.string/join \newline errors)))
@@ -63,6 +60,6 @@
       "uninstall" (sbt/uninstall (first arguments))
       "cleanup" (sbt/cleanup)
       "use" (sbt/use-version (first arguments))
-      :else (println usage)))
+      (println usage)))
   )
 
