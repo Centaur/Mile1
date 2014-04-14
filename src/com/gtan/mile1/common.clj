@@ -1,6 +1,6 @@
 (ns com.gtan.mile1.common
   (:require [clojure.java.io :as io])
-  (:import (java.nio.file Paths Path Files LinkOption FileVisitor FileVisitResult CopyOption)
+  (:import (java.nio.file Paths Path Files LinkOption FileVisitor FileVisitResult CopyOption SimpleFileVisitor)
            (java.io File)
            (java.nio.file.attribute FileAttribute PosixFilePermission)))
 
@@ -42,15 +42,8 @@
                                         PosixFilePermission/OWNER_WRITE}))
 
 (defn delete-tree [^Path path]
-  (Files/walkFileTree path (reify FileVisitor
-                             (visitFile [this file attr]
+  (Files/walkFileTree path (proxy [SimpleFileVisitor] []
+                             (visitFile [file attr]
                                (Files/delete file)
-                               FileVisitResult/CONTINUE)
-                             (preVisitDirectory [this dir attr]
-                               FileVisitResult/CONTINUE)
-                             (postVisitDirectory [this dir attr]
-                               (Files/delete dir)
-                               FileVisitResult/CONTINUE)
-                             (visitFileFailed [this file exc]
-                               (throw exc)))))
+                               FileVisitResult/CONTINUE))))
 
