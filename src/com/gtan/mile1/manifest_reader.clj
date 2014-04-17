@@ -13,18 +13,16 @@
     ;imperative version
     (loop []
       (let [n (.read is buffer 0 (count buffer))]
-        (if-not (= n -1)
-          (do
-            (.write bao buffer 0 n)
-            (recur)))))
+        (when-not (= n -1)
+          (.write bao buffer 0 n)
+          (recur))))
     ;functional version
     (->> (repeatedly #(let [n (.read is buffer 0 (count buffer))]
-                       (if-not (= n -1)
+                       (when-not (= n -1)
                          (.write bao buffer 0 n))))
          (take-until nil?)
          dorun)
-    (.toByteArray bao))
-  )
+    (.toByteArray bao)))
 
 (defn find-manifest "从jar中找到Manifest.MF项" [jis]
   (->> (repeatedly #(.getNextJarEntry jis))

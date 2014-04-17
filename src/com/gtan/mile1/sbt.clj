@@ -72,10 +72,10 @@
         latest (version->str (sbt-version/max-of-comparables versions))
         ]
     (case literal-version
-      "latest" latest ; in
+      "latest" latest                                       ; in
       "choose" (wizard/ask {:prompt  "选择一个版本安装"
                             :options version-strs
-                            :format  :indexed ; or :text
+                            :format  :indexed               ; or :text
                             :default latest})
       literal-version)))
 
@@ -107,9 +107,9 @@
         (println "安装 sbt 版本" version-str)
         (common/download-url-to (url-of-version-str version-str)
                                 (path-of-version version-str))
-        (when (not (common/exists? link-file-path))
+        (when-not (common/exists? link-file-path)
           (common/ln-replace link-file-path (path-of-version version-str)))
-        (when (not (common/exists? script-file-path))
+        (when-not (common/exists? script-file-path)
           (common/download-url-to (:sbt-script-url const)
                                   script-file-path)
           (when-not (common/is-windows)
@@ -117,10 +117,9 @@
         (println "安装完成.")))))
 
 (defn install-if-none-installed []
-  (if (empty? (installed-sbt-versions))
-    (do
-      (println "sbt 未安装.")
-      (install "choose"))))
+  (when (empty? (installed-sbt-versions))
+    (println "sbt 未安装.")
+    (install "choose")))
 
 (def using-version-str
   (delay (let [link-file-path (const :sbt-launcher-link-file-path)]
@@ -159,10 +158,10 @@
       (do (println "版本" version-str "并未安装。")))))
 
 
-(defn use-version [^String version] ; ask use if version is nil
+(defn use-version [^String version]                         ; ask use if version is nil
   (install-if-none-installed)
   (let [versions (installed-sbt-versions)]
-    (if (nil? version)
+    (if-not version
       (do
         (println "当前使用的版本:" @using-version-str)
         (set-using-version (wizard/ask {:prompt  "选择要使用的版本"

@@ -48,9 +48,7 @@
                   (.startsWith extra "Beta") [:Beta (str "0" (subs extra 4))]
                   (.startsWith extra "RC") [:RC (subs extra 2)]
                   :else [:GA extra])]
-    (if (nil? typ)
-      nil
-      (Extra. typ (Integer/valueOf s)))))
+    (and typ (Extra. typ (Integer/valueOf s)))))
 
 
 (defn ^Version str->version
