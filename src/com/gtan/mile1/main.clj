@@ -15,6 +15,7 @@
  mile1 uninstall VERSION\t; 删除指定版本的sbt
  mile1 cleanup\t\t\t; 保留最新版本的sbt，删除其它版本
  mile1 use VERSION\t\t; 使用指定版本的sbt
+ mile1 upgrade\t\t\t; 升级 Mile1 到最新版本
  mile1 usage\t\t\t; 显示本帮助信息")
 
 (def ^:private const
