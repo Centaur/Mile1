@@ -38,16 +38,18 @@
 (defn ^Extra parse-extra
   "M3 => [:M 3]
    nil => [:GA 0]
-   2 => [:GA 2]"
+   2 => [:GA 2]
+   20140603-062317 => [nil nil]"
   [^String extra]
-  (let [str->num (fn [[f s]] [f (Integer/valueOf s)])
+  (let [is-num? (fn [s] (try (Integer/parseInt s) true (catch Exception e false)))
         [typ s] (cond
                   (nil? extra) [:GA "0"]
                   (.startsWith extra "MSERVER") nil
                   (.startsWith extra "M") [:M (subs extra 1)]
                   (.startsWith extra "Beta") [:Beta (str "0" (subs extra 4))]
                   (.startsWith extra "RC") [:RC (subs extra 2)]
-                  :else [:GA extra])]
+                  (is-num? extra) [:GA extra]
+                  :else nil)]
     (and typ (Extra. typ (Integer/valueOf s)))))
 
 
@@ -55,9 +57,10 @@
   "2.10.3-M3 => [[2 10 3] [:M 3]]
    2.10.3 => [[2 10 3] [:GA 0]]"
   [^String version-str]
-  (let [[[_ l1 l2 l3 _ extra]] (re-seq (const :version-extractor) version-str)]
-    (Version. (Main. (Integer/valueOf l1) (Integer/valueOf l2) (Integer/valueOf l3))
-              (parse-extra extra))))
+  (let [[[_ l1 l2 l3 _ extra]] (re-seq (const :version-extractor) version-str)
+        main (Main. (Integer/valueOf l1) (Integer/valueOf l2) (Integer/valueOf l3))
+        extra (parse-extra extra)]
+    (when extra (Version. main extra))))
 
 (defn ^String version->str [^Version version]
   (let [main (string/join "." ((juxt :major :minor :patch) (:main version)))

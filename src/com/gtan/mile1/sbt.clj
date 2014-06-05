@@ -37,7 +37,7 @@
   "return lazy Seq[Version]"
   (delay
     (let [page (slurp (:sbt-launcher-index-page const))]
-      (remove #(nil? (:type (:extra %)))
+      (remove nil?
               (map (comp str->version second)
                    (re-seq (:link-extractor const) page))))))
 

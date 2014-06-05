@@ -20,21 +20,39 @@ else
     HTTP_CLIENT="wget -O"
 fi
 
-if [[ ! -r $MILE1_JAR ]]; then
-    echo "Installing Mile1 ..."
+
+function download_mile1 {
     mkdir -p "$(dirname $MILE1_JAR)"
     $HTTP_CLIENT "$MILE1_JAR.pending" "$MILE1_JAR_URL"
     if [ $? == 0 ]; then
         mv -f "$MILE1_JAR.pending" "$MILE1_JAR"
-        echo "Mile1 installed."
     else
         rm "$MILE1_JAR.pending" 2>/dev/null
         echo "Failed to download $MILE1_JAR_URL"
         exit 1
     fi
+}
+
+if [[ -r $MILE1_JAR ]]; then
+    if [ $1 = "upgrade" ]; then
+        rm $MILE1_JAR
+        download_mile1
+        echo "Mile1 upgraded"
+        exit 0
+	else
+    	$JAVA_CMD -Dmile1.script.path="$(dirname $0)" -jar $MILE1_JAR "$@"
+    fi
+else
+    echo "Installing Mile1 ..."
+    download_mile1
+    echo "Mile1 installed."
+    if [ $1 != "upgrade" ]; then
+    	$JAVA_CMD -Dmile1.script.path="$(dirname $0)" -jar $MILE1_JAR "$@"
+        exit 0
+    fi
 fi
 
-$JAVA_CMD -Dmile1.script.path="$(dirname $0)" -jar $MILE1_JAR "$@"
+
 
 
 
