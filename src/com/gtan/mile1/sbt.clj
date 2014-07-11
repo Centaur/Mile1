@@ -6,7 +6,8 @@
             [com.gtan.mile1.common :as common]
             [com.gtan.mile1.manifest-reader :as manifest-reader]
             [com.gtan.mile1.sbt-version :as sbt-version :refer [version->str str->version]]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [com.gtan.mile1.i18n :as i18n])
   (:import (java.nio.file Paths Files Path FileSystem)
            (java.io File)
            (com.gtan.mile1.sbt_version Version)))
@@ -73,7 +74,7 @@
         ]
     (case literal-version
       "latest" latest                                       ; in
-      "choose" (wizard/ask {:prompt  "选择一个版本安装"
+      "choose" (wizard/ask {:prompt  (i18n/msg "choose_a_version_to_install")
                             :options version-strs
                             :format  :indexed               ; or :text
                             :default latest})
@@ -127,20 +128,20 @@
 
 
 (defn show-current-installed-versions []
-  (println "已安装的版本:")
+  (println (i18n/msg "installed_versions"))
   (doseq [version-str (map sbt-version/version->str (installed-sbt-versions))]
     (print version-str)
     (when (= @using-version-str version-str)
-      (print "(正在使用)"))
+      (print (i18n/msg "currently_using")))
     (println)))
 
 
 (defn set-using-version [^String version-str]
   (if (= @using-version-str version-str)
-    (println "正在使用 sbt" version-str)
+    (println (i18n/msg "currently_using_sbt") version-str)
     (do (common/ln-replace (:sbt-launcher-link-file-path const)
                            (path-of-version version-str))
-        (println "使用 sbt" version-str))))
+        (println (i18n/msg "use") "sbt" version-str))))
 
 (defn uninstall [^String version-str]
   (let [launcher-file-path (.resolve (const :installation-base-path)
