@@ -2,21 +2,14 @@
   (:require [com.gtan.mile1.manifest-reader]
             [com.gtan.mile1.wizard :as wizard]
             [com.gtan.mile1.sbt :as sbt]
+            [com.gtan.mile1.i18n :as i18n]
             [com.gtan.mile1.common :as common]
             [com.gtan.mile1.prj :as project]
             [clojure.tools.cli :as cli])
   (:gen-class)
   (:import (java.nio.file Files)))
 
-(def usage "使用方法:
- mile1 list\t\t\t; 列出已安装的sbt版本
- mile1 available [-a]\t\t; 列出所有sbt版本，默认显示稳定版本，加上-a显示包括Milestone版本，RC版本在内的所有版本
- mile1 install [VERSION]\t; 安装指定版本的sbt, 默认安装最新的稳定版
- mile1 uninstall VERSION\t; 删除指定版本的sbt
- mile1 cleanup\t\t\t; 保留最新版本的sbt，删除其它版本
- mile1 use VERSION\t\t; 使用指定版本的sbt
- mile1 upgrade\t\t\t; 升级 Mile1 到最新版本
- mile1 usage\t\t\t; 显示本帮助信息")
+(def usage (i18n/msg "main.usage"))
 
 (def ^:private const
   (when-not *compile-files*
@@ -39,11 +32,11 @@
 
 (defn opts-for [subcmd]
   (case subcmd
-    "available" [["-a" "--all" "显示所有版本"]]
+    "available" [["-a" "--all" (i18n/msg "main.show_all_versions")]]
     []))
 
 (defn error-msg [errors]
-  (str "命令参数错误：\n\n" (clojure.string/join \newline errors)))
+  (str (i18n/msg "main.command_line_argument_error") (clojure.string/join \newline errors)))
 
 (defn exit [status msg]
   (println msg)
@@ -61,6 +54,5 @@
       "uninstall" (sbt/uninstall (first arguments))
       "cleanup" (sbt/cleanup)
       "use" (sbt/use-version (first arguments))
-      (println usage)))
-  )
+      (println usage))))
 

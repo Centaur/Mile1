@@ -4,10 +4,10 @@
   (:require [clojure.java.io :as io]
             [com.gtan.mile1.wizard :as wizard]
             [com.gtan.mile1.common :as common]
+            [com.gtan.mile1.i18n :as i18n]
             [com.gtan.mile1.manifest-reader :as manifest-reader]
             [com.gtan.mile1.sbt-version :as sbt-version :refer [version->str str->version]]
-            [clojure.string :as string]
-            [com.gtan.mile1.i18n :as i18n])
+            [clojure.string :as string])
   (:import (java.nio.file Paths Files Path FileSystem)
            (java.io File)
            (com.gtan.mile1.sbt_version Version)))
@@ -74,7 +74,7 @@
         ]
     (case literal-version
       "latest" latest                                       ; in
-      "choose" (wizard/ask {:prompt  (i18n/msg "choose_a_version_to_install")
+      "choose" (wizard/ask {:prompt  (i18n/msg "sbt.choose_a_version_to_install")
                             :options version-strs
                             :format  :indexed               ; or :text
                             :default latest})
@@ -103,9 +103,9 @@
         link-file-path (:sbt-launcher-link-file-path const)
         script-file-path (:sbt-script-file-path const)]
     (if ((set (installed-sbt-versions)) (str->version version-str))
-      (println "版本 " version-str " 已经安装. 退出.")
+      (println (i18n/msg "sbt.version_already_installed" version-str))
       (do
-        (println "安装 sbt 版本" version-str)
+        (println (i18n/msg "sbt.installing_sbt_version" version-str))
         (common/download-url-to (url-of-version-str version-str)
                                 (path-of-version version-str))
         (when-not (common/exists? link-file-path)
@@ -115,11 +115,11 @@
                                   script-file-path)
           (when-not (common/is-windows)
             (common/set-executable script-file-path)))
-        (println "安装完成.")))))
+        (println (i18n/msg "sbt.install_completed"))))))
 
 (defn install-if-none-installed []
   (when (empty? (installed-sbt-versions))
-    (println "sbt 未安装.")
+    (println (i18n/msg "sbt.sbt_not_installed"))
     (install "choose")))
 
 (def using-version-str
@@ -128,20 +128,20 @@
 
 
 (defn show-current-installed-versions []
-  (println (i18n/msg "installed_versions"))
+  (println (i18n/msg "sbt.installed_versions"))
   (doseq [version-str (map sbt-version/version->str (installed-sbt-versions))]
     (print version-str)
     (when (= @using-version-str version-str)
-      (print (i18n/msg "currently_using")))
+      (print (i18n/msg "sbt.currently_in_use")))
     (println)))
 
 
 (defn set-using-version [^String version-str]
   (if (= @using-version-str version-str)
-    (println (i18n/msg "currently_using_sbt") version-str)
+    (println (i18n/msg "sbt.currently_using_sbt_version"))
     (do (common/ln-replace (:sbt-launcher-link-file-path const)
                            (path-of-version version-str))
-        (println (i18n/msg "use") "sbt" version-str))))
+        (println (i18n/msg "sbt.use_sbt_version")))))
 
 (defn uninstall [^String version-str]
   (let [launcher-file-path (.resolve (const :installation-base-path)
@@ -150,13 +150,13 @@
       (do
         (when (= @using-version-str version-str)
           (Files/delete (:sbt-launcher-link-file-path const)))
-        (print "正在删除版本" version-str "...")
+        (print (i18n/msg "sbt.deleting_version" version-str))
         (Files/delete launcher-file-path)
         (Files/delete (.getParent launcher-file-path))
-        (println " 完成")
+        (println (i18n/msg "sbt.completed"))
         (if-let [installed (not-empty (installed-sbt-versions))]
           (set-using-version (sbt-version/version->str (last installed)))))
-      (do (println "版本" version-str "并未安装。")))))
+      (do (println (i18n/msg "sbt.version_currently_not_installed" version-str))))))
 
 
 (defn use-version [^String version]                         ; ask use if version is nil
@@ -164,14 +164,14 @@
   (let [versions (installed-sbt-versions)]
     (if-not version
       (do
-        (println "当前使用的版本:" @using-version-str)
-        (set-using-version (wizard/ask {:prompt  "选择要使用的版本"
+        (println (i18n/msg "sbt.currently_using_version" @using-version-str))
+        (set-using-version (wizard/ask {:prompt  (i18n/msg "sbt.choose_a_version_to_use")
                                         :options versions
                                         :format  :indexed
                                         :default @using-version-str})))
       (if ((set versions) (str->version version))
         (set-using-version version)
-        (println "版本 " version "未安装")))))
+        (println (i18n/msg "sbt.version_currently_not_installed") version)))))
 
 (defn cleanup
   "keep the latest installed version, delete others"
@@ -181,7 +181,7 @@
     (doseq [version (drop-last all-installed)]
       (uninstall (sbt-version/version->str version)))
     (set-using-version (sbt-version/version->str (last all-installed)))
-    (println "sbt清理完毕, 仅保留已安装的最新版本.")))
+    (println (i18n/msg "sbt.cleaned_up_msg"))))
 
 (defn reset []
   (Files/deleteIfExists (const :sbt-script-file-path))
