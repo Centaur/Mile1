@@ -22,3 +22,4 @@ project/plugins/project/
 *.iml
 downloads/stale/
 downloads/repl-port
+downloads/classes/

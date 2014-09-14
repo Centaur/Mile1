@@ -138,10 +138,10 @@
 
 (defn set-using-version [^String version-str]
   (if (= @using-version-str version-str)
-    (println (i18n/msg "sbt.currently_using_sbt_version"))
+    (println (i18n/msg "sbt.currently_using_sbt_version" @using-version-str))
     (do (common/ln-replace (:sbt-launcher-link-file-path const)
                            (path-of-version version-str))
-        (println (i18n/msg "sbt.use_sbt_version")))))
+        (println (i18n/msg "sbt.use_sbt_version" version-str)))))
 
 (defn uninstall [^String version-str]
   (let [launcher-file-path (.resolve (const :installation-base-path)
