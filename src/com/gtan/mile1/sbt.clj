@@ -123,8 +123,8 @@
     (install "choose")))
 
 (def using-version-str
-  (delay (let [link-file-path (const :sbt-launcher-link-file-path)]
-           (manifest-reader/read-sbt-version link-file-path))))
+  (when-not *compile-files* (atom (let [link-file-path (const :sbt-launcher-link-file-path)]
+                                    (manifest-reader/read-sbt-version link-file-path)))))
 
 
 (defn show-current-installed-versions []
@@ -141,6 +141,7 @@
     (println (i18n/msg "sbt.currently_using_sbt_version" @using-version-str))
     (do (common/ln-replace (:sbt-launcher-link-file-path const)
                            (path-of-version version-str))
+        (swap! using-version-str (fn [_] version-str))
         (println (i18n/msg "sbt.use_sbt_version" version-str)))))
 
 (defn uninstall [^String version-str]
@@ -180,7 +181,10 @@
   (let [all-installed (installed-sbt-versions)]
     (doseq [version (drop-last all-installed)]
       (uninstall (sbt-version/version->str version)))
-    (set-using-version (sbt-version/version->str (last all-installed)))
+    (let [last-installed (last (installed-sbt-versions))
+          last-installed-str (sbt-version/version->str last-installed)]
+      (when-not (= @using-version-str last-installed-str)
+        (set-using-version last-installed-str)))
     (println (i18n/msg "sbt.cleaned_up_msg"))))
 
 (defn reset []
