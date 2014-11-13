@@ -24,7 +24,7 @@
                                             (if (common/is-windows)
                                               (str non-windows ".bat")
                                               non-windows))
-             :link-extractor              #"<a href=\"(\d+.*)/\"+>\1/</a>"
+             :link-extractor              #"<a href=\".+/\"+>(.+)/</a>"
              :installation-base-path      base-path
              :sbt-script-file-path        (if (common/is-windows)
                                             (.resolve mile1-script-path "sbt.bat")
