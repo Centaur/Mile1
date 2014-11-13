@@ -20,7 +20,7 @@
                 ]
 
             {:sbt-launcher-index-page     "http://nexus.gtan.com/content/groups/ivy/org.scala-sbt/sbt-launch/"
-             :sbt-script-url              (let [non-windows "http://git.oschina.net/43284683/Mile1/raw/master/downloads/sbt"]
+             :sbt-script-url              (let [non-windows "http://git.oschina.net/43284683/Mile1/raw/no-typesafe/downloads/sbt"]
                                             (if (common/is-windows)
                                               (str non-windows ".bat")
                                               non-windows))
