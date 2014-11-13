@@ -1,5 +1,5 @@
-„1•3/**
- * ´Ë½Å±¾½öÓÃÀ´ÏÂÔØºÍÔËÐÐ mile1.jar£¬ÆäËüËùÓÐµÄ¹¦ÄÜ¶¼ÓÉjava´úÂëÍê³É¡£
+ï¿½1ï¿½3/**
+ * ï¿½Ë½Å±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½ï¿½ï¿½ mile1.jarï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ¹ï¿½ï¿½Ü¶ï¿½ï¿½ï¿½javaï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¡ï¿½
  */
 
 var oShell = new ActiveXObject('WScript.Shell');
@@ -40,7 +40,7 @@ var mile1JarFilePath = mile1Home + '\\mile1.jar';
     function download_mile1_jar() {
             var xHttp = new ActiveXObject("Microsoft.XMLHTTP");
             var bStrm = new ActiveXObject("Adodb.Stream");
-            xHttp.Open('GET', 'http://git.oschina.net/43284683/Mile1/raw/master/downloads/mile1.jar', false);
+            xHttp.Open('GET', 'http://git.oschina.net/43284683/Mile1/raw/no-typesafe/downloads/mile1.jar', false);
             xHttp.Send();
 
             bStrm.type = 1; // binary
