@@ -19,7 +19,7 @@
                 mile1-script-path (common/build-path (System/getProperty "mile1.script.path" "/nonexist")) ; this is where we put sbt shell script and symbolic link to the current used sbt-launch.jar
                 ]
 
-            {:sbt-launcher-index-page     "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/"
+            {:sbt-launcher-index-page     "http://nexus.gtan.com/content/groups/ivy/org.scala-sbt/sbt-launch/"
              :sbt-script-url              (let [non-windows "http://git.oschina.net/43284683/Mile1/raw/master/downloads/sbt"]
                                             (if (common/is-windows)
                                               (str non-windows ".bat")
