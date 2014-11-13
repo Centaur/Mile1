@@ -6,6 +6,8 @@
   :resource-paths ["resources"]
   :main com.gtan.mile1.main
   :aot [com.gtan.mile1.main]
+  :repositories ^:replace [["gtan" "http://nexus.gtan.com/content/groups/public/"]]
+  :plug-repositories ^:replace [["gtan" "http://nexus.gtan.com/content/groups/public/"]]
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.cli "0.3.1"]]
   :target-path "downloads/"
