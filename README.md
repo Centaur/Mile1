@@ -1,5 +1,7 @@
 #Mile1
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Centaur/Mile1?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## Prerequisites
 * JDK 6+ and `java` command on your `$PATH`|`%PATH%`
 * `curl` or `wget` on your `$PATH` for downloading on Linux or Mac.
