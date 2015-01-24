@@ -20,7 +20,7 @@
                 ]
 
             {:sbt-launcher-index-page     "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/"
-             :sbt-script-url              (let [non-windows "http://git.oschina.net/43284683/Mile1/raw/master/downloads/sbt"]
+             :sbt-script-url              (let [non-windows "https://github.com/Centaur/Mile1/raw/master/downloads/sbt"]
                                             (if (common/is-windows)
                                               (str non-windows ".bat")
                                               non-windows))

@@ -14,7 +14,7 @@
 (def ^:private const
   (when-not *compile-files*
     {:mile1-jar-path (common/build-path (System/getProperty "user.home") ".mile1" "mile1.jar")
-     :mile1-jar-url  "http://git.oschina.net/43284683/Mile1/raw/master/downloads/mile1.jar"
+     :mile1-jar-url  "https://github.com/Centaur/Mile1/raw/master/downloads/mile1.jar"
      }))
 
 (defn install-mile1-jar-if-none-installed []
