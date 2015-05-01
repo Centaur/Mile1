@@ -2,6 +2,8 @@
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Centaur/Mile1?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+#Note: Typesafe has just migrate old Artifactory repo to bintray.com cdn. All url used by Mile1 has changed so Mile1 does not work for now. Please wait for a new version.
+
 ## Prerequisites
 * JDK 6+ and `java` command on your `$PATH`|`%PATH%`
 * `curl` or `wget` on your `$PATH` for downloading on Linux or Mac.
