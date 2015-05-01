@@ -19,12 +19,12 @@
                 mile1-script-path (common/build-path (System/getProperty "mile1.script.path" "/nonexist")) ; this is where we put sbt shell script and symbolic link to the current used sbt-launch.jar
                 ]
 
-            {:sbt-launcher-index-page     "http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/"
+            {:sbt-launcher-index-page     "http://dl.bintray.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/"
              :sbt-script-url              (let [non-windows "https://github.com/Centaur/Mile1/raw/master/downloads/sbt"]
                                             (if (common/is-windows)
                                               (str non-windows ".bat")
                                               non-windows))
-             :link-extractor              #"<a href=\"(\d+.*)/\"+>\1/</a>"
+             :link-extractor              #"<pre><a onclick=\"navi\(event\)\" href=\"#(\d+.*)/\" rel=\"nofollow\">\1/</a></pre>"
              :installation-base-path      base-path
              :sbt-script-file-path        (if (common/is-windows)
                                             (.resolve mile1-script-path "sbt.bat")
